@@ -39,10 +39,9 @@ public class CategoryActivity extends AppCompatActivity {
     RecyclerView categoryRecyclerview;
     @BindView(R.id.addCategoryButton)
     Button categoryButton;
-    @BindView(R.id.addCategoryButtonDialog)
-    Button dialogButton;
-    @BindView(R.id.categoryNameEditText)
-    EditText categoryNameEdit;
+
+    private Button dialogButton;
+    private EditText categoryNameEdit;
 
     public static List<Category> categoryList = new ArrayList<>();
     private FirebaseFirestore mFirestore;
@@ -68,6 +67,9 @@ public class CategoryActivity extends AppCompatActivity {
         addCategoryDialog.setContentView(R.layout.add_category_dialog);
         addCategoryDialog.setCancelable(true);
         addCategoryDialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        dialogButton = addCategoryDialog.findViewById(R.id.addCategoryButtonDialog);
+        categoryNameEdit = addCategoryDialog.findViewById(R.id.categoryNameEditText);
 
         mFirestore = FirebaseFirestore.getInstance();
 
