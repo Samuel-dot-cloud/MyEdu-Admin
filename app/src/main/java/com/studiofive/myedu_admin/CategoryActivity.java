@@ -8,11 +8,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.util.ArrayMap;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -21,6 +26,7 @@ import com.studiofive.myedu_admin.adapters.CategoryAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -33,10 +39,15 @@ public class CategoryActivity extends AppCompatActivity {
     RecyclerView categoryRecyclerview;
     @BindView(R.id.addCategoryButton)
     Button categoryButton;
+    @BindView(R.id.addCategoryButtonDialog)
+    Button dialogButton;
+    @BindView(R.id.categoryNameEditText)
+    EditText categoryNameEdit;
 
     public static List<Category> categoryList = new ArrayList<>();
     private FirebaseFirestore mFirestore;
-    private Dialog loadingDialog;
+    private Dialog loadingDialog, addCategoryDialog;
+    private CategoryAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +64,14 @@ public class CategoryActivity extends AppCompatActivity {
         loadingDialog.getWindow().setBackgroundDrawableResource(R.drawable.progress_background);
         loadingDialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
+        addCategoryDialog = new Dialog(CategoryActivity.this);
+        addCategoryDialog.setContentView(R.layout.add_category_dialog);
+        addCategoryDialog.setCancelable(true);
+        addCategoryDialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
         mFirestore = FirebaseFirestore.getInstance();
 
+        clickEvents();
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -63,6 +80,28 @@ public class CategoryActivity extends AppCompatActivity {
 
         loadData();
 
+    }
+
+    private void clickEvents() {
+        categoryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                categoryNameEdit.getText().clear();
+                addCategoryDialog.show();
+            }
+        });
+
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (categoryNameEdit.getText().toString().isEmpty()){
+                    categoryNameEdit.setError("Enter Category Name!");
+                    return;
+                }
+
+                addNewCategory(categoryNameEdit.getText().toString());
+            }
+        });
     }
 
     private void loadData() {
@@ -84,7 +123,7 @@ public class CategoryActivity extends AppCompatActivity {
                             categoryList.add(new Category(categoryID, categoryName, "0"));
 
                         }
-                        CategoryAdapter adapter = new CategoryAdapter(categoryList);
+                         adapter = new CategoryAdapter(categoryList);
                         categoryRecyclerview.setAdapter(adapter);
 
                     }else {
@@ -97,6 +136,56 @@ public class CategoryActivity extends AppCompatActivity {
                 }
 
                 loadingDialog.dismiss();
+            }
+        });
+    }
+
+    private void addNewCategory(String title) {
+        addCategoryDialog.dismiss();
+        loadingDialog.show();
+
+        Map<String, Object> categoryData = new ArrayMap<>();
+        categoryData.put("Name", title);
+        categoryData.put("Sets", 0);
+
+        String documentID = mFirestore.collection("PreQuiz").document().getId();
+        mFirestore.collection("PreQuiz").document(documentID)
+                .set(categoryData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Map<String, Object> categoryDoc = new ArrayMap<>();
+                        categoryDoc.put("Cat" + String.valueOf(categoryList.size() + 1) + "_Name", title);
+                        categoryDoc.put("Cat" + String.valueOf(categoryList.size() + 1) + "_ID", documentID);
+                        categoryDoc.put("Count", categoryList.size() + 1);
+
+                        mFirestore.collection("PreQuiz").document("Categories")
+                                .update(categoryDoc)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Toasty.success(CategoryActivity.this, "Category added successfully", Toast.LENGTH_SHORT, true).show();
+
+                                        categoryList.add(new Category(documentID, title, "0"));
+
+                                        adapter.notifyItemInserted(categoryList.size());
+
+                                        loadingDialog.dismiss();
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                loadingDialog.dismiss();
+                                Toasty.error(CategoryActivity.this, e.getMessage(), Toast.LENGTH_SHORT, true).show();
+                            }
+                        });
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                loadingDialog.dismiss();
+                Toasty.error(CategoryActivity.this, e.getMessage(), Toast.LENGTH_SHORT, true).show();
             }
         });
     }
