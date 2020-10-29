@@ -7,18 +7,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Dialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.studiofive.myedu_admin.Classes.CategoryAdapter;
+import com.studiofive.myedu_admin.Classes.Category;
+import com.studiofive.myedu_admin.adapters.CategoryAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +34,7 @@ public class CategoryActivity extends AppCompatActivity {
     @BindView(R.id.addCategoryButton)
     Button categoryButton;
 
-    public static List<String> categoryList = new ArrayList<>();
+    public static List<Category> categoryList = new ArrayList<>();
     private FirebaseFirestore mFirestore;
     private Dialog loadingDialog;
 
@@ -56,11 +55,14 @@ public class CategoryActivity extends AppCompatActivity {
 
         mFirestore = FirebaseFirestore.getInstance();
 
+
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         categoryRecyclerview.setLayoutManager(linearLayoutManager);
 
+
         loadData();
+
     }
 
     private void loadData() {
@@ -77,18 +79,19 @@ public class CategoryActivity extends AppCompatActivity {
                         long count = (long) documentSnapshot.get("Count");
 
                         for (int i = 1; i< count; i++){
-                            String categoryName = documentSnapshot.getString("Cat" + String.valueOf(i));
-                            categoryList.add(categoryName);
+                            String categoryName = documentSnapshot.getString("Cat" + String.valueOf(i) + "_Name");
+                            String categoryID = documentSnapshot.getString("Cat" + String.valueOf(i) + "_ID");
+                            categoryList.add(new Category(categoryID, categoryName, "0"));
 
                         }
-
                         CategoryAdapter adapter = new CategoryAdapter(categoryList);
                         categoryRecyclerview.setAdapter(adapter);
 
                     }else {
                         Toasty.error(CategoryActivity.this, "Something went wrong loading categories!!!", Toast.LENGTH_SHORT, true).show();
+                        finish();
                     }
-                    finish();
+
                 }else {
                     Toasty.error(CategoryActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT, true).show();
                 }

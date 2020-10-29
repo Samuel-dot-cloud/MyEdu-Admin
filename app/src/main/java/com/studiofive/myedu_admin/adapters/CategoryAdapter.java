@@ -1,4 +1,4 @@
-package com.studiofive.myedu_admin.Classes;
+package com.studiofive.myedu_admin.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.studiofive.myedu_admin.Classes.Category;
 import com.studiofive.myedu_admin.R;
 
 import java.util.List;
@@ -17,10 +18,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHolder> {
-    private List<String> categoryList;
+    private List<Category> categoryList;
 
 
-    public CategoryAdapter(List<String> categoryList) {
+    public CategoryAdapter(List<Category> categoryList) {
         this.categoryList = categoryList;
     }
 
@@ -34,7 +35,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull CategoryAdapter.ViewHolder holder, int position) {
-        String title = categoryList.get(position);
+        String title = categoryList.get(position).getName();
 
         holder.setData(title);
     }
