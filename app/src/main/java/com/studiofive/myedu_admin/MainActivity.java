@@ -53,12 +53,12 @@ public class MainActivity extends AppCompatActivity {
         mBtnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LoginDefault();
+                loginDefault();
             }
         });
     }
 
-    private void LoginDefault() {
+    private void loginDefault() {
         String email = mEmailLogin.getText().toString();
         String password = mPasswordLogin.getText().toString();
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
@@ -94,4 +94,13 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mAuth.getCurrentUser() != null){
+            sendUserToCategoryActivity();
+        }else {
+            loginDefault();
+        }
+    }
 }
