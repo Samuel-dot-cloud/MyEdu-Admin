@@ -9,9 +9,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyEduAdmin">
-        <activity android:name=".CategoryActivity"
+        <activity android:name=".activities.SetsActivity"
             android:theme="@style/Theme.MyEduAdmin.NoActionBar"></activity>
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".activities.CategoryActivity"
+            android:theme="@style/Theme.MyEduAdmin.NoActionBar" />
+        <activity
+            android:name=".activities.MainActivity"
             android:theme="@style/Theme.MyEduAdmin.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
