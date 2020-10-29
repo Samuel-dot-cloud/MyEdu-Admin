@@ -4,11 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.CategoryActivity"
+    tools:context=".activities.SetsActivity"
     android:background="#F0D6D6">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/setsToolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/heavy_pink"
@@ -20,25 +20,25 @@
     </androidx.appcompat.widget.Toolbar>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/categoryRecyclerView"
+        android:id="@+id/setsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@id/addCategoryButton"
+        app:layout_constraintBottom_toTopOf="@id/addSetButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar">
+        app:layout_constraintTop_toBottomOf="@id/setsToolbar">
 
     </androidx.recyclerview.widget.RecyclerView>
 
     <Button
-        android:id="@+id/addCategoryButton"
+        android:id="@+id/addSetButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="New Category"
+        android:text="New Set"
         android:background="@color/heavy_maroon"
         android:textColor="@color/white"
         android:textSize="18sp"
@@ -46,6 +46,4 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

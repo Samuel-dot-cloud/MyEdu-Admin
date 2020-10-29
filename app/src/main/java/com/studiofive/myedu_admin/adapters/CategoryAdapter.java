@@ -3,6 +3,7 @@ package com.studiofive.myedu_admin.adapters;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
@@ -22,9 +23,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.studiofive.myedu_admin.CategoryActivity;
+import com.studiofive.myedu_admin.activities.CategoryActivity;
 import com.studiofive.myedu_admin.Classes.Category;
 import com.studiofive.myedu_admin.R;
+import com.studiofive.myedu_admin.activities.SetsActivity;
 
 import java.util.List;
 import java.util.Map;
@@ -97,6 +99,14 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
 
         private void setData(String title, int position, CategoryAdapter adapter) {
             categoryName.setText(title);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(itemView.getContext(), SetsActivity.class);
+                    itemView.getContext().startActivity(intent);
+                }
+            });
 
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override

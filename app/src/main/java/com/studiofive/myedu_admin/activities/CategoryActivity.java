@@ -1,4 +1,4 @@
-package com.studiofive.myedu_admin;
+package com.studiofive.myedu_admin.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +22,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.studiofive.myedu_admin.Classes.Category;
+import com.studiofive.myedu_admin.R;
 import com.studiofive.myedu_admin.adapters.CategoryAdapter;
 
 import java.util.ArrayList;
@@ -119,7 +120,7 @@ public class CategoryActivity extends AppCompatActivity {
                     if (documentSnapshot.exists()){
                         long count = (long) documentSnapshot.get("Count");
 
-                        for (int i = 1; i< count; i++){
+                        for (int i = 1; i< count + 1; i++){
                             String categoryName = documentSnapshot.getString("Cat" + String.valueOf(i) + "_Name");
                             String categoryID = documentSnapshot.getString("Cat" + String.valueOf(i) + "_ID");
                             categoryList.add(new Category(categoryID, categoryName, "0"));
@@ -149,6 +150,7 @@ public class CategoryActivity extends AppCompatActivity {
         Map<String, Object> categoryData = new ArrayMap<>();
         categoryData.put("Name", title);
         categoryData.put("Sets", 0);
+        categoryData.put("Counter", "1");
 
         String documentID = mFirestore.collection("PreQuiz").document().getId();
         mFirestore.collection("PreQuiz").document(documentID)
