@@ -38,7 +38,7 @@
         android:id="@+id/addSetButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="New Set"
+        android:text="Add New Set"
         android:background="@color/heavy_maroon"
         android:textColor="@color/white"
         android:textSize="18sp"
