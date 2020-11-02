@@ -45,6 +45,8 @@ public class CategoryActivity extends AppCompatActivity {
     private EditText categoryNameEdit;
 
     public static List<Category> categoryList = new ArrayList<>();
+    public static int selected_category_index = 0;
+
     private FirebaseFirestore mFirestore;
     private Dialog loadingDialog, addCategoryDialog;
     private CategoryAdapter adapter;
@@ -123,7 +125,7 @@ public class CategoryActivity extends AppCompatActivity {
                         for (int i = 1; i< count + 1; i++){
                             String categoryName = documentSnapshot.getString("Cat" + String.valueOf(i) + "_Name");
                             String categoryID = documentSnapshot.getString("Cat" + String.valueOf(i) + "_ID");
-                            categoryList.add(new Category(categoryID, categoryName, "0"));
+                            categoryList.add(new Category(categoryID, categoryName, "0", "1"));
 
                         }
                          adapter = new CategoryAdapter(categoryList);
@@ -170,7 +172,7 @@ public class CategoryActivity extends AppCompatActivity {
                                     public void onSuccess(Void aVoid) {
                                         Toasty.success(CategoryActivity.this, "Category added successfully", Toast.LENGTH_SHORT, true).show();
 
-                                        categoryList.add(new Category(documentID, title, "0"));
+                                        categoryList.add(new Category(documentID, title, "0", "1"));
 
                                         adapter.notifyItemInserted(categoryList.size());
 
