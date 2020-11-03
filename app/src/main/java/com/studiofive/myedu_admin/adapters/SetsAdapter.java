@@ -37,6 +37,7 @@ import es.dmoral.toasty.Toasty;
 
 import static com.studiofive.myedu_admin.activities.CategoryActivity.categoryList;
 import static com.studiofive.myedu_admin.activities.CategoryActivity.selected_category_index;
+import static com.studiofive.myedu_admin.activities.SetsActivity.selected_set_index;
 
 public class SetsAdapter extends RecyclerView.Adapter<SetsAdapter.ViewHolder> {
     private List<String> setsIDs;
@@ -90,6 +91,7 @@ public class SetsAdapter extends RecyclerView.Adapter<SetsAdapter.ViewHolder> {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    selected_set_index = position;
                     Intent intent = new Intent(itemView.getContext(), QuestionsActivity.class);
                     itemView.getContext().startActivity(intent);
                 }

@@ -56,7 +56,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
         }
 
         private void setData(int position){
-            questionName.setText("Question " + position);
+            questionName.setText("Question " + String.valueOf(position+1));
         }
     }
 }
