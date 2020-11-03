@@ -3,6 +3,7 @@ package com.studiofive.myedu_admin.adapters;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
@@ -24,6 +25,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.studiofive.myedu_admin.R;
+import com.studiofive.myedu_admin.activities.QuestionsActivity;
 import com.studiofive.myedu_admin.activities.SetsActivity;
 
 import java.util.List;
@@ -35,6 +37,7 @@ import es.dmoral.toasty.Toasty;
 
 import static com.studiofive.myedu_admin.activities.CategoryActivity.categoryList;
 import static com.studiofive.myedu_admin.activities.CategoryActivity.selected_category_index;
+import static com.studiofive.myedu_admin.activities.SetsActivity.selected_set_index;
 
 public class SetsAdapter extends RecyclerView.Adapter<SetsAdapter.ViewHolder> {
     private List<String> setsIDs;
@@ -84,6 +87,15 @@ public class SetsAdapter extends RecyclerView.Adapter<SetsAdapter.ViewHolder> {
 
         public void setData(int position, String setID, final SetsAdapter setsAdapter) {
             setName.setText("Set " + String.valueOf(position + 1));
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    selected_set_index = position;
+                    Intent intent = new Intent(itemView.getContext(), QuestionsActivity.class);
+                    itemView.getContext().startActivity(intent);
+                }
+            });
 
             setDelete.setOnClickListener(new View.OnClickListener() {
                 @Override

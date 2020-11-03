@@ -41,6 +41,7 @@ public class SetsActivity extends AppCompatActivity {
     Button setButton;
 
     public static List<String> setsIDs = new ArrayList<>();
+    public static int selected_set_index = 0;
     private SetsAdapter setsAdapter;
     private FirebaseFirestore mFireStore;
     private Dialog loadingDialog;
