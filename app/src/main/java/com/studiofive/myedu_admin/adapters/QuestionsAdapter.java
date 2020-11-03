@@ -3,6 +3,7 @@ package com.studiofive.myedu_admin.adapters;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
@@ -22,6 +23,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.studiofive.myedu_admin.Classes.Question;
 import com.studiofive.myedu_admin.R;
+import com.studiofive.myedu_admin.activities.QuestionDetailsActivity;
 
 import java.util.List;
 import java.util.Map;
@@ -80,6 +82,16 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.View
 
         private void setData(int position, final QuestionsAdapter questionsAdapter){
             questionName.setText("Question " + String.valueOf(position+1));
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(itemView.getContext(), QuestionDetailsActivity.class);
+                    intent.putExtra("ACTION", "EDIT");
+                    intent.putExtra("Q_ID", position);
+                    itemView.getContext().startActivity(intent);
+                }
+            });
 
             questionDelete.setOnClickListener(new View.OnClickListener() {
                 @Override

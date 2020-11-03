@@ -7,8 +7,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.ArrayMap;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
@@ -63,6 +65,15 @@ public class QuestionsActivity extends AppCompatActivity {
         loadingDialog.setCancelable(false);
         loadingDialog.getWindow().setBackgroundDrawableResource(R.drawable.progress_background);
         loadingDialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        questionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(QuestionsActivity.this, QuestionDetailsActivity.class);
+                intent.putExtra("ACTION","ADD");
+                startActivity(intent);
+            }
+        });
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(RecyclerView.VERTICAL);
@@ -124,5 +135,13 @@ public class QuestionsActivity extends AppCompatActivity {
                         Toasty.error(QuestionsActivity.this, e.getMessage(), Toast.LENGTH_SHORT, true).show();
                     }
                 });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (questionsAdapter != null) {
+            questionsAdapter.notifyDataSetChanged();
+        }
     }
 }
