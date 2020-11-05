@@ -91,7 +91,7 @@ public class SetsAdapter extends RecyclerView.Adapter<SetsAdapter.ViewHolder> {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    selected_set_index = position;
+                    selected_set_index = position ;
                     Intent intent = new Intent(itemView.getContext(), QuestionsActivity.class);
                     itemView.getContext().startActivity(intent);
                 }

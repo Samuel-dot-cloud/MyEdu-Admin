@@ -81,12 +81,14 @@ public class SetsActivity extends AppCompatActivity {
     private void loadSets() {
         setsIDs.clear();
         loadingDialog.show();
+
         mFireStore.collection("PreQuiz").document(categoryList.get(selected_category_index).getId())
                 .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 long noOfSets = (long) documentSnapshot.get("Sets");
-                for (int i = 0; i < noOfSets; i++){
+
+                for (int i = 1; i < noOfSets + 1; i++){
                     setsIDs.add(documentSnapshot.getString("Set" + String.valueOf(i) + "_ID"));
                 }
 
