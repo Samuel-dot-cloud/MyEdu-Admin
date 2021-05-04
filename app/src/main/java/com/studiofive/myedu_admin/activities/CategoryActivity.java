@@ -1,31 +1,46 @@
 package com.studiofive.myedu_admin.activities;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.ArrayMap;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.studiofive.myedu_admin.Classes.Category;
 import com.studiofive.myedu_admin.R;
 import com.studiofive.myedu_admin.adapters.CategoryAdapter;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,11 +58,17 @@ public class CategoryActivity extends AppCompatActivity {
 
     private Button dialogButton;
     private EditText categoryNameEdit;
+    private ImageView categoryImage;
+    private int REQUEST_CODE = 5;
+    private Uri imageUri;
 
     public static List<Category> categoryList = new ArrayList<>();
     public static int selected_category_index = 0;
 
     private FirebaseFirestore mFirestore;
+    private FirebaseStorage firebaseStorage;
+    private StorageReference storageReference;
+
     private Dialog loadingDialog, addCategoryDialog;
     private CategoryAdapter adapter;
 
@@ -73,8 +94,11 @@ public class CategoryActivity extends AppCompatActivity {
 
         dialogButton = addCategoryDialog.findViewById(R.id.addCategoryButtonDialog);
         categoryNameEdit = addCategoryDialog.findViewById(R.id.categoryNameEditText);
+        categoryImage = addCategoryDialog.findViewById(R.id.imageView);
 
         mFirestore = FirebaseFirestore.getInstance();
+        firebaseStorage = FirebaseStorage.getInstance();
+        storageReference = firebaseStorage.getReference().child("Category Images");
 
         clickEvents();
 
@@ -88,25 +112,30 @@ public class CategoryActivity extends AppCompatActivity {
     }
 
     private void clickEvents() {
-        categoryButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                categoryNameEdit.getText().clear();
-                addCategoryDialog.show();
-            }
+        categoryButton.setOnClickListener(v -> {
+            categoryNameEdit.getText().clear();
+            addCategoryDialog.show();
         });
 
-        dialogButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (categoryNameEdit.getText().toString().isEmpty()){
-                    categoryNameEdit.setError("Enter Category Name!");
-                    return;
-                }
-
-                addNewCategory(categoryNameEdit.getText().toString());
+        dialogButton.setOnClickListener(v -> {
+            if (categoryNameEdit.getText().toString().isEmpty()) {
+                categoryNameEdit.setError("Enter Category Name!");
+                return;
             }
+
+            addNewCategory(categoryNameEdit.getText().toString());
         });
+
+        categoryImage.setOnClickListener(v -> {
+            choosePicture();
+        });
+    }
+
+    private void choosePicture() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, REQUEST_CODE);
     }
 
     private void loadData() {
@@ -114,36 +143,84 @@ public class CategoryActivity extends AppCompatActivity {
         loadingDialog.show();
         categoryList.clear();
         mFirestore.collection("PreQuiz").document("Categories")
-                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()){
-                    DocumentSnapshot documentSnapshot = task.getResult();
-                    if (documentSnapshot.exists()){
-                        long count = (long) documentSnapshot.get("Count");
+                .get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot documentSnapshot = task.getResult();
+                if (documentSnapshot.exists()) {
+                    long count = (long) documentSnapshot.get("Count");
 
-                        for (int i = 1; i< count + 1; i++){
-                            String categoryName = documentSnapshot.getString("Cat" + String.valueOf(i) + "_Name");
-                            String categoryID = documentSnapshot.getString("Cat" + String.valueOf(i) + "_ID");
-                            categoryList.add(new Category(categoryID, categoryName, "0", "1"));
+                    for (int i = 1; i < count + 1; i++) {
+                        String categoryName = documentSnapshot.getString("Cat" + String.valueOf(i) + "_Name");
+                        String categoryID = documentSnapshot.getString("Cat" + String.valueOf(i) + "_ID");
+                        categoryList.add(new Category(categoryID, categoryName, "0", "1"));
 
-                        }
-                         adapter = new CategoryAdapter(categoryList);
-                        categoryRecyclerview.setAdapter(adapter);
-
-                    }else {
-                        Toasty.error(CategoryActivity.this, "Something went wrong loading categories!!!", Toast.LENGTH_SHORT, true).show();
-                        finish();
                     }
+                    adapter = new CategoryAdapter(categoryList);
+                    categoryRecyclerview.setAdapter(adapter);
 
-                }else {
-                    Toasty.error(CategoryActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT, true).show();
+                } else {
+                    Toasty.error(CategoryActivity.this, "Something went wrong loading categories!!!", Toast.LENGTH_SHORT, true).show();
+                    finish();
                 }
 
-                loadingDialog.dismiss();
+            } else {
+                Toasty.error(CategoryActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT, true).show();
             }
+
+            loadingDialog.dismiss();
         });
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            imageUri = data.getData();
+            categoryImage.setImageURI(imageUri);
+        }
+    }
+
+    private void uploadPicture(String documentID) {
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("Uploading Image...");
+        progressDialog.show();
+
+
+        StorageReference filePath = storageReference.child(documentID + "." + getMimeType(getApplicationContext(), imageUri));
+        filePath.putFile(imageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+                    while (!uriTask.isSuccessful()) ;
+                    Uri downloadUri = uriTask.getResult();
+
+                    final String downloadPic_url = String.valueOf(downloadUri);
+
+                    HashMap<String, Object> hashMap = new HashMap<>();
+                    hashMap.put("Cat" + (categoryList.size()) + "_Image", downloadPic_url);
+
+                    mFirestore.collection("PreQuiz").document("Categories")
+                            .update(hashMap)
+                            .addOnSuccessListener(aVoid -> {
+                                progressDialog.dismiss();
+                                Snackbar.make(findViewById(android.R.id.content), "Image uploaded", Snackbar.LENGTH_LONG).show();
+                            }).addOnFailureListener(e -> {
+                        progressDialog.dismiss();
+                        Snackbar.make(findViewById(android.R.id.content), e.getMessage(), Snackbar.LENGTH_LONG).show();
+                    });
+
+
+                }).addOnFailureListener(e -> {
+            progressDialog.dismiss();
+            Snackbar.make(findViewById(android.R.id.content), e.getMessage(), Snackbar.LENGTH_LONG).show();
+        })
+                .addOnProgressListener(snapshot -> {
+                    double progressPercent = (100.00 * snapshot.getBytesTransferred() / snapshot.getTotalByteCount());
+                    progressDialog.setMessage("Percentage: " + (int) progressPercent + "%");
+                });
+
+
+    }
+
 
     private void addNewCategory(String title) {
         addCategoryDialog.dismiss();
@@ -154,45 +231,54 @@ public class CategoryActivity extends AppCompatActivity {
         categoryData.put("Sets", 0);
         categoryData.put("Counter", "1");
 
-        String documentID = mFirestore.collection("PreQuiz").document().getId();
+        final String documentID = mFirestore.collection("PreQuiz").document().getId();
         mFirestore.collection("PreQuiz").document(documentID)
                 .set(categoryData)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Map<String, Object> categoryDoc = new ArrayMap<>();
-                        categoryDoc.put("Cat" + String.valueOf(categoryList.size() + 1) + "_Name", title);
-                        categoryDoc.put("Cat" + String.valueOf(categoryList.size() + 1) + "_ID", documentID);
-                        categoryDoc.put("Count", categoryList.size() + 1);
+                .addOnSuccessListener(aVoid -> {
 
-                        mFirestore.collection("PreQuiz").document("Categories")
-                                .update(categoryDoc)
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Toasty.success(CategoryActivity.this, "Category added successfully", Toast.LENGTH_SHORT, true).show();
+                    String savedID = documentID;
+                    uploadPicture(savedID);
 
-                                        categoryList.add(new Category(documentID, title, "0", "1"));
+                    Map<String, Object> categoryDoc = new ArrayMap<>();
+                    categoryDoc.put("Cat" + (categoryList.size() + 1) + "_Name", title);
+                    categoryDoc.put("Cat" + (categoryList.size() + 1) + "_ID", documentID);
+                    categoryDoc.put("Count", categoryList.size() + 1);
 
-                                        adapter.notifyItemInserted(categoryList.size());
 
-                                        loadingDialog.dismiss();
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
+
+                    mFirestore.collection("PreQuiz").document("Categories")
+                            .update(categoryDoc)
+                            .addOnSuccessListener(aVoid1 -> {
+                                Toasty.success(CategoryActivity.this, "Category added successfully", Toast.LENGTH_SHORT, true).show();
+
+                                categoryList.add(new Category(documentID, title, "0", "1"));
+
+                                adapter.notifyItemInserted(categoryList.size());
+
                                 loadingDialog.dismiss();
-                                Toasty.error(CategoryActivity.this, e.getMessage(), Toast.LENGTH_SHORT, true).show();
-                            }
-                        });
+                            }).addOnFailureListener(e -> {
+                        loadingDialog.dismiss();
+                        Toasty.error(CategoryActivity.this, e.getMessage(), Toast.LENGTH_SHORT, true).show();
+                    });
 
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                loadingDialog.dismiss();
-                Toasty.error(CategoryActivity.this, e.getMessage(), Toast.LENGTH_SHORT, true).show();
-            }
+                }).addOnFailureListener(e -> {
+            loadingDialog.dismiss();
+            Toasty.error(CategoryActivity.this, e.getMessage(), Toast.LENGTH_SHORT, true).show();
         });
+    }
+
+    private static String getMimeType(Context context, Uri uri) {
+        String extension;
+        //Check uri format to avoid null
+        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+            //If scheme is a content
+            final MimeTypeMap mime = MimeTypeMap.getSingleton();
+            extension = mime.getExtensionFromMimeType(context.getContentResolver().getType(uri));
+        } else {
+            //If scheme is a File
+            //This will replace white spaces with %20 and also other special characters. This will avoid returning null values on file name with spaces and special characters.
+            extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(new File(uri.getPath())).toString());
+        }
+        return extension;
     }
 }
