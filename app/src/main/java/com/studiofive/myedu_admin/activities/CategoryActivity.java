@@ -57,7 +57,7 @@ public class CategoryActivity extends AppCompatActivity {
     Button categoryButton;
 
     private Button dialogButton;
-    private EditText categoryNameEdit;
+    private EditText categoryNameEdit, categoryDetailEdit;
     private ImageView categoryImage;
     private int REQUEST_CODE = 5;
     private Uri imageUri;
@@ -94,6 +94,7 @@ public class CategoryActivity extends AppCompatActivity {
 
         dialogButton = addCategoryDialog.findViewById(R.id.addCategoryButtonDialog);
         categoryNameEdit = addCategoryDialog.findViewById(R.id.categoryNameEditText);
+        categoryDetailEdit = addCategoryDialog.findViewById(R.id.categoryDescEditText);
         categoryImage = addCategoryDialog.findViewById(R.id.imageView);
 
         mFirestore = FirebaseFirestore.getInstance();
@@ -114,6 +115,7 @@ public class CategoryActivity extends AppCompatActivity {
     private void clickEvents() {
         categoryButton.setOnClickListener(v -> {
             categoryNameEdit.getText().clear();
+            categoryDetailEdit.getText().clear();
             addCategoryDialog.show();
         });
 
@@ -121,9 +123,12 @@ public class CategoryActivity extends AppCompatActivity {
             if (categoryNameEdit.getText().toString().isEmpty()) {
                 categoryNameEdit.setError("Enter Category Name!");
                 return;
+            } else if (categoryDetailEdit.getText().toString().isEmpty()){
+                categoryDetailEdit.setError("Enter Category Details!");
+                return;
             }
 
-            addNewCategory(categoryNameEdit.getText().toString());
+            addNewCategory(categoryNameEdit.getText().toString(), categoryDetailEdit.getText().toString());
         });
 
         categoryImage.setOnClickListener(v -> {
@@ -222,7 +227,7 @@ public class CategoryActivity extends AppCompatActivity {
     }
 
 
-    private void addNewCategory(String title) {
+    private void addNewCategory(String title, String description) {
         addCategoryDialog.dismiss();
         loadingDialog.show();
 
@@ -242,6 +247,7 @@ public class CategoryActivity extends AppCompatActivity {
                     Map<String, Object> categoryDoc = new ArrayMap<>();
                     categoryDoc.put("Cat" + (categoryList.size() + 1) + "_Name", title);
                     categoryDoc.put("Cat" + (categoryList.size() + 1) + "_ID", documentID);
+                    categoryDoc.put("Cat" + (categoryList.size() + 1) + "_Description", description);
                     categoryDoc.put("Count", categoryList.size() + 1);
 
 

@@ -9,4 +9,5 @@
     <string name="category_name">Category Name</string>
     <string name="add">Add</string>
     <string name="update">UPDATE</string>
+    <string name="category_description">Category Description</string>
 </resources>

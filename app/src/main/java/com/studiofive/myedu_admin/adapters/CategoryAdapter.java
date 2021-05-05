@@ -202,38 +202,29 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
             mFirestore = FirebaseFirestore.getInstance();
             mFirestore.collection("PreQuiz").document(categoryList.get(position).getId())
                     .update(categoryData)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Map<String, Object> categoryDoc = new ArrayMap<>();
-                            categoryDoc.put("Cat" + String.valueOf(position + 1) + "_Name", newName);
+                    .addOnSuccessListener(aVoid -> {
+                        Map<String, Object> categoryDoc = new ArrayMap<>();
+                        categoryDoc.put("Cat" + (position + 1) + "_Name", newName);
 
-                            mFirestore.collection("PreQuiz").document("Categories")
-                                    .update(categoryDoc)
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-                                            Toasty.success(mContext.getApplicationContext(), "Category name updated successfully", Toast.LENGTH_SHORT, true).show();
-                                            CategoryActivity.categoryList.get(position).setName(newName);
-                                            adapter.notifyDataSetChanged();
-                                            loadingDialog.dismiss();
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Toasty.error(mContext.getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT, true).show();
-                                        }
-                                    });
-                        }
+                        mFirestore.collection("PreQuiz").document("Categories")
+                                .update(categoryDoc)
+                                .addOnSuccessListener(aVoid1 -> {
+                                    Toasty.success(mContext.getApplicationContext(), "Category name updated successfully", Toast.LENGTH_SHORT, true).show();
+                                    CategoryActivity.categoryList.get(position).setName(newName);
+                                    adapter.notifyDataSetChanged();
+                                    loadingDialog.dismiss();
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toasty.error(mContext.getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT, true).show();
+                                    }
+                                });
                     })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            loadingDialog.dismiss();
-                            Toasty.error(mContext.getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT, true).show();
+                    .addOnFailureListener(e -> {
+                        loadingDialog.dismiss();
+                        Toasty.error(mContext.getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT, true).show();
 
-                        }
                     });
 
         }
