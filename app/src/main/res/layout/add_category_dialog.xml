@@ -32,7 +32,7 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
         android:ems="10"
-        android:inputType="textPersonName"
+        android:inputType="textMultiLine"
         android:hint="@string/category_description"
         android:textColor="@android:color/black"
         android:backgroundTint="@color/heavy_pink"

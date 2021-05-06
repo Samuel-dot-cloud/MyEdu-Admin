@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -72,8 +73,9 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         private Dialog loadingDialog;
         private Dialog editDialog;
 
-        private EditText editCategoryName;
+        private EditText editCategoryName, editCategoryDescription;
         private Button editCategoryButton;
+        private ImageView editCategoryImage;
 
         private FirebaseFirestore mFirestore;
 
@@ -94,6 +96,8 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
             editDialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
             editCategoryName = editDialog.findViewById(R.id.updatecategoryNameEditText);
+            editCategoryDescription = editDialog.findViewById(R.id.updateCategoryDescEditText);
+            editCategoryImage = editDialog.findViewById(R.id.updateImageView);
             editCategoryButton = editDialog.findViewById(R.id.updateCategoryButtonDialog);
         }
 
@@ -109,14 +113,13 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
                 }
             });
 
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    editCategoryName.setText(categoryList.get(position).getName());
+            itemView.setOnLongClickListener(v -> {
+                editCategoryName.setText(categoryList.get(position).getName());
+                editCategoryDescription.setText(categoryList.get(position).getDescription());
+                Glide.with(itemView.getContext()).load(categoryList.get(position).getImage()).placeholder(R.drawable.category).into(editCategoryImage);
 
-                    editDialog.show();
-                    return false;
-                }
+                editDialog.show();
+                return false;
             });
 
             editCategoryButton.setOnClickListener(new View.OnClickListener() {
@@ -125,9 +128,11 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
                     if (editCategoryName.getText().toString().isEmpty()) {
                         editCategoryName.setError("Enter category name!");
                         return;
+                    } else if(editCategoryDescription.getText().toString().isEmpty()) {
+                        editCategoryDescription.setError("Enter category description!");
                     }
 
-                    updateCategory(editCategoryName.getText().toString(), position, itemView.getContext(), adapter);
+                    updateCategory(editCategoryName.getText().toString(), editCategoryDescription.getText().toString(), position, itemView.getContext(), adapter);
                 }
             });
 
@@ -185,16 +190,13 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
                             loadingDialog.dismiss();
                         }
                     })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            loadingDialog.dismiss();
-                            Toasty.error(mContext.getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT, true).show();
-                        }
+                    .addOnFailureListener(e -> {
+                        loadingDialog.dismiss();
+                        Toasty.error(mContext.getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT, true).show();
                     });
         }
 
-        private void updateCategory(String newName, int position, Context mContext, CategoryAdapter adapter) {
+        private void updateCategory(String newName, String newCategory, int position, Context mContext, CategoryAdapter adapter) {
             editDialog.dismiss();
             loadingDialog.show();
 
@@ -205,6 +207,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
                     .addOnSuccessListener(aVoid -> {
                         Map<String, Object> categoryDoc = new ArrayMap<>();
                         categoryDoc.put("Cat" + (position + 1) + "_Name", newName);
+                        categoryDoc.put("Cat" + (position + 1) + "_Description", newCategory);
 
                         mFirestore.collection("PreQuiz").document("Categories")
                                 .update(categoryDoc)
@@ -214,12 +217,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
                                     adapter.notifyDataSetChanged();
                                     loadingDialog.dismiss();
                                 })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toasty.error(mContext.getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT, true).show();
-                                    }
-                                });
+                                .addOnFailureListener(e -> Toasty.error(mContext.getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT, true).show());
                     })
                     .addOnFailureListener(e -> {
                         loadingDialog.dismiss();

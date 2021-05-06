@@ -155,9 +155,11 @@ public class CategoryActivity extends AppCompatActivity {
                     long count = (long) documentSnapshot.get("Count");
 
                     for (int i = 1; i < count + 1; i++) {
-                        String categoryName = documentSnapshot.getString("Cat" + String.valueOf(i) + "_Name");
-                        String categoryID = documentSnapshot.getString("Cat" + String.valueOf(i) + "_ID");
-                        categoryList.add(new Category(categoryID, categoryName, "0", "1"));
+                        String categoryName = documentSnapshot.getString("Cat" + i + "_Name");
+                        String categoryID = documentSnapshot.getString("Cat" + i + "_ID");
+                        String categoryDescription = documentSnapshot.getString("Cat" + i + "_ID");
+                        String categoryImage = documentSnapshot.getString("Cat" + i + "_Image");
+                        categoryList.add(new Category(categoryID, categoryName, categoryDescription, categoryImage, "0", "1"));
 
                     }
                     adapter = new CategoryAdapter(categoryList);
@@ -257,7 +259,7 @@ public class CategoryActivity extends AppCompatActivity {
                             .addOnSuccessListener(aVoid1 -> {
                                 Toasty.success(CategoryActivity.this, "Category added successfully", Toast.LENGTH_SHORT, true).show();
 
-                                categoryList.add(new Category(documentID, title, "0", "1"));
+                                categoryList.add(new Category(documentID, title, description, "","0", "1"));
 
                                 adapter.notifyItemInserted(categoryList.size());
 

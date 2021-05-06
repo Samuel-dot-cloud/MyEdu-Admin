@@ -3,12 +3,16 @@ package com.studiofive.myedu_admin.Classes;
 public class Category {
     private String id;
     private String name;
+    private String description;
+    private String image;
     private String no0fSets;
     private String setCounter;
 
-    public Category(String id, String name, String no0fSets, String setCounter) {
+    public Category(String id, String name, String description, String image, String no0fSets, String setCounter) {
         this.id = id;
         this.name = name;
+        this.description = description;
+        this.image = image;
         this.no0fSets = no0fSets;
         this.setCounter = setCounter;
     }
@@ -27,6 +31,22 @@ public class Category {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public String getNo0fSets() {
