@@ -212,7 +212,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
                         mFirestore.collection("PreQuiz").document("Categories")
                                 .update(categoryDoc)
                                 .addOnSuccessListener(aVoid1 -> {
-                                    Toasty.success(mContext.getApplicationContext(), "Category name updated successfully", Toast.LENGTH_SHORT, true).show();
+                                    Toasty.success(mContext.getApplicationContext(), "Category details updated successfully", Toast.LENGTH_SHORT, true).show();
                                     CategoryActivity.categoryList.get(position).setName(newName);
                                     adapter.notifyDataSetChanged();
                                     loadingDialog.dismiss();

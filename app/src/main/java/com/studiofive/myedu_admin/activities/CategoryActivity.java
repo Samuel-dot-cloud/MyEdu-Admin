@@ -157,7 +157,7 @@ public class CategoryActivity extends AppCompatActivity {
                     for (int i = 1; i < count + 1; i++) {
                         String categoryName = documentSnapshot.getString("Cat" + i + "_Name");
                         String categoryID = documentSnapshot.getString("Cat" + i + "_ID");
-                        String categoryDescription = documentSnapshot.getString("Cat" + i + "_ID");
+                        String categoryDescription = documentSnapshot.getString("Cat" + i + "_Description");
                         String categoryImage = documentSnapshot.getString("Cat" + i + "_Image");
                         categoryList.add(new Category(categoryID, categoryName, categoryDescription, categoryImage, "0", "1"));
 
